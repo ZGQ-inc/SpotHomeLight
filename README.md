@@ -125,6 +125,11 @@ spothomelight -a
 spothomelight -s
 ```
 
+## 🐛 已知问题
+
+* **取色结果与客户端不一致**: 
+  本工具目前使用 **K-Means 聚类算法** 来提取封面主色调。由于 Spotify 官方客户端的动态取色算法（涉及饱和度筛选、亮度平衡、以及如何排除纯黑/纯白背景等逻辑）并未公开且较为复杂，**本工具计算出的颜色可能与你在 Spotify 电脑或手机端看到的背景色存在差异**。
+
 ## 📝 License
 
 MIT License. Copyright (c) 2026 ZGQ Inc.
