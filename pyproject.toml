@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spothomelight"
+version = "0.1.0"
+description = "Sync Spotify cover color to Home Assistant via Webhook"
+authors = [
+  { name = "ZGQ Inc.", email = "zgqinc@gmail.com" },
+]
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "requests",
+    "spotipy",
+    "colorgram.py",
+    "Pillow",
+    "appdirs"
+]
+
+[project.scripts]
+spothomelight = "spothomelight.main:main"
+
+[project.urls]
+"Homepage" = "https://domain.zgqinc.gq/"
