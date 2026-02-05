@@ -34,7 +34,7 @@ pip install spothomelight
 3. 将 Redirect URI 设置为：
 
 ```
-[http://127.0.0.1:29092/callback](http://127.0.0.1:29092/callback)
+http://127.0.0.1:29092/callback
 ```
 
 4. 记下 **Client ID** 和 **Client Secret**。
