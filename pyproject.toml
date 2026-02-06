@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spothomelight"
-version = "1.0.3"
+version = "1.0.4"
 description = "Sync Spotify cover color to Home Assistant via Webhook"
 authors = [
   { name = "ZGQ Inc.", email = "zgqinc@gmail.com" },
