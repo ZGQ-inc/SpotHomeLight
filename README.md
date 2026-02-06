@@ -78,7 +78,7 @@ mode: restart
 trigger:
   - platform: webhook
     webhook_id: ""
-    local_only: true
+    local_only: false
 condition: []
 action:
   - service: light.turn_on
