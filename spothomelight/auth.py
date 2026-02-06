@@ -44,4 +44,4 @@ def get_spotify_client(config):
             print(f"登录失败: {e}")
             return None
 
-    return spotipy.Spotify(auth=token_info['access_token'], oauth_manager=sp_oauth)
+    return spotipy.Spotify(oauth_manager=sp_oauth)
