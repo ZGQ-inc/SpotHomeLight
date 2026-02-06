@@ -30,7 +30,7 @@ def get_image_color(image_url):
             return (rgb.r, rgb.g, rgb.b)
 
     except Exception as e:
-        print(f"取色失败: {e}")
+        print(f"get_image_color Error: {e}")
         return None
 
 def write_pid():

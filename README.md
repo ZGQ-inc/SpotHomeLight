@@ -9,7 +9,7 @@
 * **跨平台支持**：完美支持 Linux (Systemd) 和 Windows (计划任务)。
 * **无头模式设计**：专为无显示器的家用服务器设计，支持终端内完成 OAuth 认证。
 * **智能取色**：使用 K-Means 聚类算法提取最主要颜色，并进行缩略图预处理以降低 CPU 占用。
-* **开机自启**：内置一键配置开机自动运行 (`-a`)。
+* **开机自启**：内置一键配置开机自动运行。
 * **低资源占用**：去重机制，仅在切歌时进行下载和计算。
 
 ## 🛠️ 前置要求
@@ -119,10 +119,16 @@ spothomelight -a
 * **Linux**: 会自动创建并启用 Systemd User Service。
 * **Windows**: 会自动创建 Windows 计划任务（登录时运行）。
 
+手动启动服务：
+
+```bash
+spothomelight --start
+```
+
 停止服务：
 
 ```bash
-spothomelight -s
+spothomelight --stop
 ```
 
 ## 🐛 已知问题

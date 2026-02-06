@@ -16,13 +16,13 @@ def run_loop(config):
     interval = int(config['GENERAL']['interval'])
     
     if not webhook_id:
-        print("错误: 配置文件中 webhook_id 为空，无法发送数据。")
+        print("Error: webhook_id is empty.")
         return
 
     webhook_full_url = f"{ha_url}/api/webhook/{webhook_id}"
     
-    print(f"服务已启动。监控频率: {interval}秒")
-    print(f"Home Assistant 地址: {webhook_full_url}")
+    print(f"Service started. interval: {interval}")
+    print(f"Home Assistant: {webhook_full_url}")
 
     last_track_id = None
     last_is_playing = False
@@ -40,7 +40,7 @@ def run_loop(config):
                 track_id = item['id']
                 
                 if track_id != last_track_id or not last_is_playing:
-                    print(f"检测到正在播放: {item['name']} - {item['artists'][0]['name']}")
+                    print(f"Now playing: {item['name']} - {item['artists'][0]['name']}")
                     
                     images = item['album']['images']
                     image_url = images[0]['url'] if images else None
@@ -59,9 +59,9 @@ def run_loop(config):
                             
                             try:
                                 requests.post(webhook_full_url, json=payload, timeout=5)
-                                print(f"已发送颜色 {payload['hex']} 到 HA")
+                                print(f"Push {payload['hex']} to HA")
                             except Exception as e:
-                                print(f"发送 Webhook 失败: {e}")
+                                print(f"Webhook Error: {e}")
                     
                     last_track_id = track_id
                 
@@ -69,7 +69,7 @@ def run_loop(config):
             
             else:
                 if last_is_playing:
-                    print("播放已暂停/停止")
+                    print("stop/pause playing")
                     # try:
                     #     requests.post(webhook_full_url, json={"state": "paused"}, timeout=5)
                     # except:
@@ -77,7 +77,7 @@ def run_loop(config):
                 last_is_playing = False
 
         except Exception as e:
-            print(f"运行循环发生错误: {e}")
+            print(f"Error: {e}")
             time.sleep(10)
 
         time.sleep(interval)
