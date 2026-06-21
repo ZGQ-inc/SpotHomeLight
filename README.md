@@ -1,14 +1,16 @@
 # SpotHomeLight 🎵🏠💡
 
-**SpotHomeLight** 是一个轻量级的 Python 服务，用于将 Spotify 当前播放封面的主色调同步到 Home Assistant。
+**SpotHomeLight** 是一个轻量级的 Python 服务，用于将 Spotify 当前播放封面的主色调、音乐能量及 BPM 同步到 Home Assistant。
 
-它运行在你的家用服务器（Linux 或 Windows）上，通过 K-Means 聚类算法提取封面颜色，并通过 Webhook 实时推送到 Home Assistant，让你的智能灯光跟随音乐氛围律动。
+它运行在你的家用服务器（Linux 或 Windows）上，通过 K-Means 聚类算法提取封面颜色，并通过 Spotify 音频特征分析（Audio Features）提取动态节奏，通过 Webhook 实时推送到 Home Assistant，让你的智能灯光和电机跟随音乐氛围律动。
 
 ## ✨ 功能特性
 
 * **跨平台支持**：完美支持 Linux (Systemd) 和 Windows (计划任务)。
+* **多设备支持**：支持普通 RGB、RGBW（动态亮度映射）以及 RGB-CCT（动态色温映射）氛围灯。
 * **无头模式设计**：专为无显示器的家用服务器设计，支持终端内完成 OAuth 认证。
 * **智能取色**：使用 K-Means 聚类算法提取最主要颜色，并进行缩略图预处理以降低 CPU 占用。
+* **物理转速同步**：抓取 Spotify 曲目 BPM (Tempo)，可映射至本地电机/风扇设备，且支持独立周期的脉冲更新。
 * **开机自启**：内置一键配置开机自动运行。
 * **低资源占用**：去重机制，仅在切歌时进行下载和计算。
 
@@ -31,12 +33,7 @@ pip install spothomelight
 
 1. 登录 [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/).
 2. 创建一个新的 App (例如命名为 `SpotHomeLight`)。
-3. 将 Redirect URI 设置为：
-
-```
-http://127.0.0.1:29092/callback
-```
-
+3. 将 Redirect URI 设置为：`http://127.0.0.1:29092/callback`
 4. 记下 **Client ID** 和 **Client Secret**。
 
 ### 初始化配置
@@ -47,7 +44,7 @@ http://127.0.0.1:29092/callback
 spothomelight -c
 ```
 
-conf描述：
+conf 描述：
 
 ```ini
 [SPOTIFY]
@@ -61,7 +58,17 @@ webhook_id = 从 Home Assistant 获取的 Webhook ID
 
 [GENERAL]
 interval = 循环周期（秒）
+
+[DEVICE]
+type = 设备类型: rgb/rgbw/rgb_cct
+has_motor = true/false 是否开启电机转速同步
+motor_interval = 推送电机转速的间隔周期（秒）
 ```
+
+> **设备类型：**
+> * **type=rgb**: 提取封面颜色。
+> * **type=rgbw**: 读取 `energy` (0.0-1.0)，高能量音乐灯光更亮，轻音乐更柔和。
+> * **type=rgb_cct**: 除上述外还会读取 `valence` (0.0-1.0)，正向情绪数值可映射为暖色温。
 
 ### 配置 Home Assistant
 
@@ -73,21 +80,35 @@ interval = 循环周期（秒）
 
 ```yaml
 alias: Spotify Cover Sync
-description: ""
+description: "根据 Spotify 状态控制 RGBW 及电机"
 mode: restart
 trigger:
   - platform: webhook
-    webhook_id: ""
+    webhook_id: "填入你的WebhookID"
     local_only: false
 condition: []
 action:
-  - service: light.turn_on
-    target:
-      entity_id: light.pending
-    data:
-      rgb_color: "{{ trigger.json.rgb }}"
-      brightness_pct: 100
-      transition: 2
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.json.state == 'playing' }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: light.your_aurora_light
+            data:
+              rgb_color: "{{ trigger.json.rgb | default([255,255,255]) }}"
+              brightness_pct: "{{ (trigger.json.energy * 100) | int if trigger.json.energy is defined else 100 }}"
+              transition: 2
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.json.state in ['playing', 'motor_update'] and trigger.json.tempo is defined }}"
+        sequence:
+          - service: number.set_value
+            target:
+              entity_id: number.your_motor_speed
+            data:
+              value: "{{ trigger.json.tempo }}"
 ```
 
 ### 首次运行与认证

@@ -21,27 +21,44 @@ webhook_id =
 
 [GENERAL]
 interval = 5
+
+[DEVICE]
+type = rgb
+has_motor = false
+motor_interval = 5
 """
 
 HA_YAML_TEMPLATE = """
-配置完毕后，请配置 Home Assistant 的自动化配置。
-
 alias: Spotify Cover Sync
-description: ""
+description: "根据 Spotify 状态控制 RGBW/CCT 及电机"
 mode: restart
 trigger:
   - platform: webhook
-    webhook_id: ""
+    webhook_id: "填入你的WebhookID"
     local_only: true
 condition: []
 action:
-  - service: light.turn_on
-    target:
-      entity_id: light.pending
-    data:
-      rgb_color: "{{ trigger.json.rgb }}"
-      brightness_pct: 100
-      transition: 2
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.json.state == 'playing' }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: light.your_aurora_light
+            data:
+              rgb_color: "{{ trigger.json.rgb | default([255,255,255]) }}"
+              brightness_pct: "{{ (trigger.json.energy * 100) | int if trigger.json.energy is defined else 100 }}"
+              transition: 2
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.json.state in ['playing', 'motor_update'] and trigger.json.tempo is defined }}"
+        sequence:
+          - service: number.set_value
+            target:
+              entity_id: number.your_motor_speed
+            data:
+              value: "{{ trigger.json.tempo }}"
 """
 
 def ensure_config():
