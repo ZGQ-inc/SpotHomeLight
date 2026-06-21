@@ -80,35 +80,51 @@ motor_interval = 推送电机转速的间隔周期（秒）
 
 ```yaml
 alias: Spotify Cover Sync
-description: "根据 Spotify 状态控制 RGBW 及电机"
+description: "根据 Spotify 状态联动灯光亮度及电机转速"
 mode: restart
-trigger:
-  - platform: webhook
-    webhook_id: "填入你的WebhookID"
+
+triggers:
+  - webhook_id: "填入你的 Webhook ID"
     local_only: false
-condition: []
-action:
-  - choose:
-      - conditions:
-          - condition: template
-            value_template: "{{ trigger.json.state == 'playing' }}"
-        sequence:
-          - service: light.turn_on
-            target:
-              entity_id: light.your_aurora_light
-            data:
-              rgb_color: "{{ trigger.json.rgb | default([255,255,255]) }}"
-              brightness_pct: "{{ (trigger.json.energy * 100) | int if trigger.json.energy is defined else 100 }}"
-              transition: 2
-      - conditions:
-          - condition: template
-            value_template: "{{ trigger.json.state in ['playing', 'motor_update'] and trigger.json.tempo is defined }}"
-        sequence:
-          - service: number.set_value
-            target:
-              entity_id: number.your_motor_speed
-            data:
-              value: "{{ trigger.json.tempo }}"
+    trigger: webhook
+    allowed_methods:
+      - POST
+      - PUT
+
+conditions:
+  - condition: state
+    entity_id: binary_sensor.your_occupancy_sensor  # 替换为你的人在传感器
+    state:
+      - "on"
+
+actions:
+  - if:
+      - condition: template
+        value_template: "{{ trigger.json.state == 'playing' }}"
+    then:
+      - action: light.turn_on
+        target:
+          entity_id:
+            - light.your_rgbw_light         # 替换为你的主灯/氛围灯实体
+            - light.your_atmosphere_light   # 替换为你的水波纹/极光灯实体
+        data:
+          transition: 2
+          rgb_color: "{{ trigger.json.rgb }}"
+          brightness_pct: "{{ (trigger.json.energy * 100) | int if trigger.json.energy is defined else 100 }}"
+
+  - if:
+      - condition: template
+        value_template: "{{ trigger.json.state in ['playing', 'motor_update'] and trigger.json.tempo is defined }}"
+    then:
+      - action: fan.set_percentage
+        target:
+          entity_id:
+            - fan.your_motor_entity         # 替换为你的极光灯/水波纹灯电机实体
+        data:
+          percentage: >
+            {% set bpm = trigger.json.tempo | float %}
+            {% set pct = (bpm / 1.8) | int %}
+            {{ [10, [100, pct] | min] | max }}
 ```
 
 ### 首次运行与认证
