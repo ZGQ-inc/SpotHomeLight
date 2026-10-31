@@ -2,8 +2,9 @@ import argparse
 import sys
 from .config import load_config, open_config_editor
 from .service import setup_autostart, start_managed_service
-from .utils import check_running, stop_process
+from .utils import check_running, stop_process, remove_pid
 from .core import run_loop
+from .auth import get_spotify_client
 
 def main():
     parser = argparse.ArgumentParser(
@@ -16,6 +17,8 @@ def main():
     
     config_group = parser.add_argument_group('配置选项')
     config_group.add_argument("-c", "--config", action="store_true", help="打开配置文件")
+    config_group.add_argument("-l", "--auth", action="store_true", help="登录并授权 Spotify")
+    
     service_group = parser.add_argument_group('服务管理')
     service_group.add_argument("-a", "--autostart", action="store_true", help="配置开机自动运行")
     service_group.add_argument("--start", action="store_true", help="启动已配置的后台服务")
@@ -26,6 +29,16 @@ def main():
     if args.config:
         open_config_editor()
         sys.exit(0)
+
+    if args.auth:
+        config = load_config()
+        client = get_spotify_client(config)
+        if client:
+            print("Spotify 授权成功且有效！")
+            sys.exit(0)
+        else:
+            print("Spotify 授权失败。")
+            sys.exit(1)
 
     if args.stop:
         stop_process()
@@ -54,7 +67,8 @@ def main():
         run_loop(config)
     except KeyboardInterrupt:
         print("\n用户手动停止。")
-        stop_process()
+    finally:
+        remove_pid()
 
 if __name__ == "__main__":
     main()

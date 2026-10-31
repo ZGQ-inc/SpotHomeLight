@@ -21,6 +21,7 @@ webhook_id =
 
 [GENERAL]
 interval = 5
+# proxy = http://127.0.0.1:7890
 
 [DEVICE]
 type = rgb
@@ -90,8 +91,25 @@ def ensure_config():
 def load_config():
     ensure_config()
     config = configparser.ConfigParser()
-    config.read(CONFIG_FILE)
+    config.read(CONFIG_FILE, encoding='utf-8')
     return config
+
+def get_proxy(config):
+    """获取配置中的代理设置。
+    
+    >>> cfg = configparser.ConfigParser()
+    >>> get_proxy(cfg) is None
+    True
+    """
+    proxy = None
+    if config.has_option('GENERAL', 'proxy'):
+        proxy = config.get('GENERAL', 'proxy').strip()
+    elif config.has_option('SPOTIFY', 'proxy'):
+        proxy = config.get('SPOTIFY', 'proxy').strip()
+    
+    if proxy:
+        return {"http": proxy, "https": proxy}
+    return None
 
 def open_config_editor():
     ensure_config()

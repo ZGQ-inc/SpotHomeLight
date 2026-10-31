@@ -17,7 +17,8 @@ def setup_autostart():
             service_path = os.path.join(service_dir, service_file)
             service_content = f"""[Unit]
 Description=SpotHomeLight Service (System)
-After=network.target
+After=network.target network-online.target
+Wants=network-online.target
 
 [Service]
 ExecStart={script_cmd}
@@ -46,7 +47,8 @@ WantedBy=multi-user.target
             
             service_content = f"""[Unit]
 Description=SpotHomeLight Service (User)
-After=network.target
+After=network.target network-online.target
+Wants=network-online.target
 
 [Service]
 ExecStart={script_cmd}

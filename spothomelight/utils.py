@@ -10,9 +10,15 @@ from appdirs import user_cache_dir
 APP_NAME = "spothomelight"
 PID_FILE = os.path.join(user_cache_dir(APP_NAME), "spothomelight.pid")
 
-def get_image_color(image_url):
+def get_image_color(image_url, proxies=None):
+    """提取图片的主色调 RGB。
+    
+    >>> callable(get_image_color)
+    True
+    """
     try:
-        response = requests.get(image_url, timeout=10)
+        response = requests.get(image_url, proxies=proxies, timeout=10)
+        response.raise_for_status()
         original_image_data = BytesIO(response.content)
         
         with Image.open(original_image_data) as img:
@@ -40,6 +46,13 @@ def write_pid():
     with open(PID_FILE, 'w') as f:
         f.write(str(os.getpid()))
 
+def remove_pid():
+    if os.path.exists(PID_FILE):
+        try:
+            os.remove(PID_FILE)
+        except OSError:
+            pass
+
 def check_running():
     if os.path.exists(PID_FILE):
         try:
@@ -48,7 +61,7 @@ def check_running():
             os.kill(pid, 0)
             return pid
         except (OSError, ValueError):
-            os.remove(PID_FILE)
+            remove_pid()
     return None
 
 def stop_process():
@@ -57,8 +70,7 @@ def stop_process():
         try:
             os.kill(pid, signal.SIGTERM)
             print(f"已停止进程 PID: {pid}")
-            if os.path.exists(PID_FILE):
-                os.remove(PID_FILE)
+            remove_pid()
         except PermissionError:
             print("权限不足，无法停止进程。")
     else:
