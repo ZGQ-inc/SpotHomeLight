@@ -130,7 +130,7 @@ def get_spotify_client(config):
                 pass
 
         try:
-            token_info = sp_oauth.get_access_token(code)
+            token_info = sp_oauth.get_access_token(code, check_cache=False)
             print(f"登录成功！Token 已保存至: {TOKEN_FILE}")
         except Exception as e:
             print(f"登录失败: {e}")
