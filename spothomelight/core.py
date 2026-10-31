@@ -1,6 +1,8 @@
 import time
 import requests
 import json
+import spotipy
+from spotipy.exceptions import SpotifyException
 from .utils import get_image_color, write_pid, remove_pid
 from .auth import get_spotify_client
 from .config import get_proxy
