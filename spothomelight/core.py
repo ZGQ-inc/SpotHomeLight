@@ -123,6 +123,17 @@ def run_loop(config):
                         print("stop/pause playing")
                     last_is_playing = False
 
+            except requests.exceptions.RequestException as e:
+                print(f"Network Error: {e}")
+                time.sleep(10)
+            except spotipy.exceptions.SpotifyException as e:
+                if e.http_status == 403 and "Active premium subscription" in str(e):
+                    print("错误 [Spotify 403 Forbidden]: 创建此 Spotify Developer App 的账号必须拥有处于有效期的 Spotify Premium (会员)。")
+                    print("原因: Spotify 官方政策限制，开发者后台 App 的所有者账号必须为 Premium。")
+                    print("请在 https://developer.spotify.com/dashboard 确认创建 App 的账号拥有有效会员，或使用会员账号创建 App 并更新 Client ID / Secret。")
+                else:
+                    print(f"Spotify API Error: {e}")
+                time.sleep(15)
             except Exception as e:
                 print(f"Error: {e}")
                 time.sleep(10)
