@@ -11,9 +11,20 @@ CONFIG_FILE = os.path.join(CONFIG_DIR, "spothomelight.conf")
 TOKEN_FILE = os.path.join(CONFIG_DIR, "token.json")
 
 DEFAULT_CONFIG = """[SPOTIFY]
+# 运行模式:
+#   official : 官方 Web API 模式（需要拥有 Spotify Premium 会员并在 developer.spotify.com 创建 App）
+#   bridge   : 免凭证桥接模式（无需开发者账号与会员，免费账号可用）
+#              特别鸣谢: bridge 模式基于开源项目 kittinan/spotify-github-profile 提供的公共服务支持
+mode = official
+
+# [official 模式配置]
 client_id = 
 client_secret = 
 redirect_uri = http://127.0.0.1:29092/callback
+
+# [bridge 模式配置]
+# 前往 https://spotify-github-profile.kittinanx.com 登录授权后，复制分配给您的 UID 填入此处即可
+uid = 
 
 [HOME_ASSISTANT]
 ha_url = http://127.0.0.1:8123
@@ -115,7 +126,7 @@ def open_config_editor():
     ensure_config()
     
     print(f"\n正在打开配置文件: {CONFIG_FILE}")
-    print("请填写 Spotify Client ID/Secret 和 Home Assistant Webhook ID。")
+    print("请填写 Spotify 配置与 Home Assistant Webhook ID。")
     print(HA_YAML_TEMPLATE)
 
     system_platform = platform.system()

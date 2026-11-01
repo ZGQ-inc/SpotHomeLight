@@ -12,12 +12,15 @@ def main():
         description="Spotify 专辑封面颜色控制智能家居（Home Assistant）。",
         formatter_class=argparse.RawTextHelpFormatter,
         epilog="""
+特别鸣谢 / Credits:
+本项目免凭证桥接功能由开源项目 kittinan/spotify-github-profile
+(https://github.com/kittinan/spotify-github-profile) 提供的公共服务支持，特此致谢！
         """
     )
     
     config_group = parser.add_argument_group('配置选项')
     config_group.add_argument("-c", "--config", action="store_true", help="打开配置文件")
-    config_group.add_argument("-l", "--auth", action="store_true", help="登录并授权 Spotify")
+    config_group.add_argument("-l", "--auth", action="store_true", help="登录并授权 Spotify (仅官方模式)")
     
     service_group = parser.add_argument_group('服务管理')
     service_group.add_argument("-a", "--autostart", action="store_true", help="配置开机自动运行")
@@ -32,6 +35,12 @@ def main():
 
     if args.auth:
         config = load_config()
+        mode = config.get('SPOTIFY', 'mode', fallback='official').lower()
+        if mode == 'bridge':
+            print("提示: 当前配置为 bridge (免凭证) 模式，无需进行 OAuth 登录授权。")
+            print("只需在配置文件中填写您的 UID 即可。若需使用官方 API 模式，请在配置文件中设置 mode = official。")
+            sys.exit(0)
+
         client = get_spotify_client(config)
         if client:
             print("Spotify 授权成功且有效！")
