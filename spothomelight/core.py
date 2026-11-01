@@ -67,7 +67,7 @@ def run_bridge_loop(config):
                 track_key = (title, artist)
 
                 if track_key != last_track_key or not last_is_playing:
-                    print(f"Now playing: {title} - {artist}")
+                    print(f"Now playing: {title} - {artist}", flush=True)
                     rgb = info.get('rgb')
                     hex_color = info.get('hex')
 
@@ -84,20 +84,20 @@ def run_bridge_loop(config):
                         }
                         try:
                             ha_session.post(webhook_full_url, json=payload, timeout=5)
-                            print(f"Push {hex_color} to HA (Bridge Mode)")
+                            print(f"Push {hex_color} to HA (Bridge Mode)", flush=True)
                         except Exception as e:
-                            print(f"Webhook Error: {e}")
+                            print(f"Webhook Error: {e}", flush=True)
 
                     last_track_key = track_key
 
                 last_is_playing = True
             else:
                 if last_is_playing:
-                    print("stop/pause playing")
+                    print("stop/pause playing", flush=True)
                 last_is_playing = False
 
         except Exception as e:
-            print(f"[Bridge Mode Error]: {e}")
+            print(f"[Bridge Mode Error]: {e}", flush=True)
             time.sleep(10)
 
         time.sleep(interval)
