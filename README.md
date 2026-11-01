@@ -49,13 +49,13 @@ spothomelight -c
 # 运行模式: official (官方模式，需 Premium) 或 bridge (免凭证模式，免费账号可用)
 mode = bridge
 
-# ----------------- 【模式一：免凭证桥接模式 (bridge)】 -----------------
+# 【模式一：免凭证桥接模式 (bridge)】 
 # 适合没有 Premium 会员或不想申请开发者凭证的用户。
 # 1. 访问 https://spotify-github-profile.kittinanx.com 点击登录授权
-# 2. 授权后页面会显示您的 UID (例如 a54fe2pnapk5pbzbh0on5gczd)，将其填入下方即可：
+# 2. 授权后页面会显示您的 UID ，将其填入下方即可：
 uid = your_spotify_uid
 
-# ----------------- 【模式二：官方 Web API 模式 (official)】 -----------------
+# 【模式二：官方 Web API 模式 (official)】 
 # 适合拥有 Spotify Premium 会员的用户，支持获取 Energy、Valence 及 BPM。
 # 登录 https://developer.spotify.com/dashboard 创建 App：
 # 重定向 URI 设置为: http://127.0.0.1:29092/callback
