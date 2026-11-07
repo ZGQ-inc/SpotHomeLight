@@ -88,7 +88,7 @@ motor_interval = 5
 
 ```yaml
 alias: Spotify Cover Sync
-description: "根据 Spotify 状态联动灯光亮度及电机转速"
+description: "根据 Spotify 状态联动灯光颜色、亮度及电机转速"
 mode: restart
 
 triggers:
@@ -100,15 +100,17 @@ triggers:
       - PUT
 
 conditions:
+  # 可选：配置人在传感器条件（无需人在检测可直接删除 conditions 部分）
   - condition: state
     entity_id: binary_sensor.your_occupancy_sensor  # 替换为你的人在传感器
     state:
       - "on"
 
 actions:
+  # 1. 音乐封面色彩与亮度同步
   - if:
       - condition: template
-        value_template: "{{ trigger.json.state == 'playing' }}"
+        value_template: "{{ trigger.json is defined and trigger.json.state == 'playing' }}"
     then:
       - action: light.turn_on
         target:
@@ -117,12 +119,13 @@ actions:
             - light.your_atmosphere_light   # 替换为你的水波纹/极光灯实体
         data:
           transition: 2
-          rgb_color: "{{ trigger.json.rgb }}"
-          brightness_pct: "{{ (trigger.json.energy * 100) | int if trigger.json.energy is defined else 100 }}"
+          rgb_color: "{{ trigger.json.rgb if (trigger.json is defined and trigger.json.rgb is defined) else [255, 255, 255] }}"
+          brightness_pct: "{{ (trigger.json.energy * 100) | int if (trigger.json is defined and trigger.json.energy is defined) else 100 }}"
 
+  # 2. 物理转速同步（BPM 节奏，官方模式支持）
   - if:
       - condition: template
-        value_template: "{{ trigger.json.state in ['playing', 'motor_update'] and trigger.json.tempo is defined }}"
+        value_template: "{{ trigger.json is defined and trigger.json.state in ['playing', 'motor_update'] and trigger.json.tempo is defined }}"
     then:
       - action: fan.set_percentage
         target:
@@ -134,6 +137,11 @@ actions:
             {% set pct = (bpm / 1.8) | int %}
             {{ [10, [100, pct] | min] | max }}
 ```
+
+> [!TIP]
+> **小贴士：仅同步当前已开灯的设备**
+> 如果你不希望切歌时把原本处于关闭状态的灯光自动开灯，可以在 `actions` 中为每个灯具增加 `condition: state, state: 'on'` 检查，或者使用 Home Assistant 的条件分支（`if light.is_on then ...`），确保仅对已开启的氛围灯进行色彩同步。
+
 
 ### 首次运行与服务启动
 
