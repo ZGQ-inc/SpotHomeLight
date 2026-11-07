@@ -167,7 +167,10 @@ spothomelight --stop    # 停止服务
 ## 💖 特别鸣谢 (Credits)
 
 本项目免凭证桥接功能由以下开源项目提供的公共服务支持，特此向原作者致谢：
-* **[kittinan/spotify-github-profile](https://github.com/kittinan/spotify-github-profile)** - 由 [@kittinan](https://github.com/kittinan) 开发并维护的优秀 Spotify 动态卡片服务。
+* **[kittinan/spotify-github-profile](https://github.com/kittinan/spotify-github-profile)** - 由 [@kittinan](https://github.com/kittinan) 开发并维护的优秀 Spotify 动态卡片服务（首选源）。
+* **[JeffreyCA/spotify-recently-played-readme](https://github.com/JeffreyCA/spotify-recently-played-readme)** - 由 [@JeffreyCA](https://github.com/JeffreyCA) 开发并维护的高可用 Spotify 播放记录服务（热备源）。
+
+当首选源遇到上游服务波动或切歌间隙 500 异常时，SpotHomeLight 会自动无缝切换至备用源，确保灯光同步 24/7 不间断。
 
 ## 🐛 已知问题
 
